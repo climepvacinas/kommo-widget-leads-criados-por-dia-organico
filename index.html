@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -54,7 +53,7 @@
   </div>
 
   <script>
-    const token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6ImFlZTIzM...";
+    const token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6IjRmYzE4YTNhZjQxNzBiYTBjZDI5NjM0Y2M4YzE4ODBjNzFmNzY5NjJlNTEyOWM0ZmEyNzQ3N2YwNDJhMDBmY2FiYzdmMTNjODk5MTI4OGM5In0.eyJhdWQiOiIxNmRlNzFmYS1mYjdjLTRkZjEtOWVhNS0yMDg3M2YxOWU1NTkiLCJqdGkiOiI0ZmMxOGEzYWY0MTcwYmEwY2QyOTYzNGNjOGMxODgwYzcxZjc2OTYyZTUxMjljNGZhMjc0NzdmMDQyYTAwZmNhYmM3ZjEzYzg5OTEyODhjOSIsImlhdCI6MTc1MjcwMzg5NywibmJmIjoxNzUyNzAzODk3LCJleHAiOjE4Mjc1MzI4MDAsInN1YiI6IjEzNDQyOTc5IiwiZ3JhbnRfdHlwZSI6IiIsImFjY291bnRfaWQiOjM0ODEzNzI3LCJiYXNlX2RvbWFpbiI6ImtvbW1vLmNvbSIsInZlcnNpb24iOjIsInNjb3BlcyI6WyJjcm0iLCJmaWxlcyIsImZpbGVzX2RlbGV0ZSIsIm5vdGlmaWNhdGlvbnMiLCJwdXNoX25vdGlmaWNhdGlvbnMiXSwiaGFzaF91dWlkIjoiOWNhMGUwOTAtNWE1ZC00MDllLThmNjktZDVjOTQ3ODU4YTYwIiwiYXBpX2RvbWFpbiI6ImFwaS1jLmtvbW1vLmNvbSJ9.EVabGzWM-hrXCWlPH9gMumUmqJVs1sIpILGGEwNiAxskpvt7HFSyv-d3Tb2ZOtuaPxN8ZaVqB3LeW5dwdlKwvHIroVKoraPI2u_jLuuSSTlgHgS6yjz_Pl9_f4PCkyH8hj71OE1L4vxSZ63N9SrT0aUPJOgmbfgR7nJEWwRFFso7Mnfd5lquMWOUZJVlu4hMvd-XBNeOFT4rEplUkapIAg2B1WWSLP3IYnNmdzjV7Pv7cGqeggLQLKasu8DXA0Yg2XxnVxrGFr1N9hOGfvA1x6BhU9CIkQdbigZClfPom8jLXoWwoP5BZrkr9CNhgUCzL6gph3dBcDCNtKM8PjGF_Q"; // substitua pela sua token real
     const domain = "climepbh.kommo.com";
     const chartCanvas = document.getElementById("leadsChart").getContext("2d");
     let leadsChart;
@@ -68,7 +67,10 @@
         return;
       }
 
-      const url = `https://${domain}/api/v4/leads?filter[created_at][from]=${start}&filter[created_at][to]=${end}`;
+      const startTimestamp = Math.floor(new Date(start).getTime() / 1000);
+      const endTimestamp = Math.floor(new Date(end).getTime() / 1000);
+
+      const url = `https://${domain}/api/v4/leads?filter[created_at][from]=${startTimestamp}&filter[created_at][to]=${endTimestamp}`;
 
       const res = await fetch(url, {
         method: "GET",
@@ -85,6 +87,7 @@
 
       const data = await res.json();
       const leads = data._embedded?.leads || [];
+      console.log("Leads encontrados:", leads);
 
       const dailyCounts = {};
       for (const lead of leads) {

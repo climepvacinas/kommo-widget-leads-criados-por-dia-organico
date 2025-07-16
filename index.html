@@ -68,7 +68,7 @@
         return;
       }
 
-      const url = `https://${domain}/api/v4/leads?filter[created_at][from]={start}&filter[created_at][to]={end}`;
+      const url = `https://${domain}/api/v4/leads?filter[created_at][from]=${start}&filter[created_at][to]=${end}`;
 
       const res = await fetch(url, {
         method: "GET",

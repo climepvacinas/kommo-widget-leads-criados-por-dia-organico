@@ -1,0 +1,134 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Leads por Dia - Kommo Widget</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #111;
+      color: #fff;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+    }
+    input[type="date"] {
+      background: #222;
+      border: 1px solid #555;
+      color: #fff;
+      padding: 8px;
+      margin-right: 10px;
+    }
+    button {
+      padding: 8px 12px;
+      background-color: #00acc1;
+      border: none;
+      color: #fff;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    canvas {
+      background: #1a1a1a;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Leads criados por dia</h2>
+    <label>Selecione o período:</label>
+    <input type="date" id="startDate" />
+    <input type="date" id="endDate" />
+    <button onclick="loadChart()">Atualizar</button>
+    <canvas id="leadsChart" width="800" height="400"></canvas>
+  </div>
+
+  <script>
+    const token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6ImFlZTIzM...";
+    const domain = "climepbh.kommo.com";
+    const chartCanvas = document.getElementById("leadsChart").getContext("2d");
+    let leadsChart;
+
+    async function loadChart() {
+      const start = document.getElementById("startDate").value;
+      const end = document.getElementById("endDate").value;
+
+      if (!start || !end) {
+        alert("Por favor, selecione as datas de início e fim.");
+        return;
+      }
+
+      const url = `https://${domain}/api/v4/leads?filter[created_at][from]={start}&filter[created_at][to]={end}`;
+
+      const res = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      });
+
+      if (!res.ok) {
+        alert("Erro ao buscar os dados da API Kommo");
+        return;
+      }
+
+      const data = await res.json();
+      const leads = data._embedded?.leads || [];
+
+      const dailyCounts = {};
+      for (const lead of leads) {
+        const date = new Date(lead.created_at * 1000).toISOString().split("T")[0];
+        dailyCounts[date] = (dailyCounts[date] || 0) + 1;
+      }
+
+      const sortedDates = Object.keys(dailyCounts).sort();
+      const counts = sortedDates.map(date => dailyCounts[date]);
+
+      if (leadsChart) leadsChart.destroy();
+
+      leadsChart = new Chart(chartCanvas, {
+        type: "line",
+        data: {
+          labels: sortedDates,
+          datasets: [{
+            label: "Leads criados por dia",
+            data: counts,
+            fill: false,
+            borderColor: "#00acc1",
+            tension: 0.3,
+            pointBackgroundColor: "#00acc1",
+            pointBorderColor: "#00acc1"
+          }]
+        },
+        options: {
+          scales: {
+            x: {
+              ticks: { color: "#fff" },
+              grid: { color: "#444" }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: { color: "#fff" },
+              grid: { color: "#444" }
+            }
+          },
+          plugins: {
+            legend: { labels: { color: "#fff" } }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>

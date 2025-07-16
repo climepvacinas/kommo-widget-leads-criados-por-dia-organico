@@ -1,0 +1,11 @@
+{
+  "name": "Widget Leads por Dia",
+  "version": "1.0",
+  "widgets": [
+    {
+      "location": "custom_card",
+      "url": "https://climepvacinas.github.io/kommo-widget-leads-criados-por-dia-organico/index.html",
+      "title": "Leads por Dia"
+    }
+  ]
+}

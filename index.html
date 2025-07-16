@@ -52,6 +52,8 @@
     <canvas id="leadsChart" width="800" height="400"></canvas>
   </div>
 
+  <script src="https://widgets.kommo.com/js/widgets_sdk.js"></script>
+
   <script>
     const chartCanvas = document.getElementById("leadsChart").getContext("2d");
     let leadsChart;
@@ -65,70 +67,71 @@
         return;
       }
 
-      // Fetch dos leads via Kommo.request
-      const response = await window.Kommo.request.get(`/api/v4/leads`, {
-        params: {
-          'filter[created_at][from]': start,
-          'filter[created_at][to]': end
-        }
-      });
-
-      const leads = response?._embedded?.leads || [];
-
-      const dailyCounts = {};
-      for (const lead of leads) {
-        const date = new Date(lead.created_at * 1000).toISOString().split("T")[0];
-        dailyCounts[date] = (dailyCounts[date] || 0) + 1;
-      }
-
-      const sortedDates = Object.keys(dailyCounts).sort();
-      const counts = sortedDates.map(date => dailyCounts[date]);
-
-      if (leadsChart) leadsChart.destroy();
-
-      leadsChart = new Chart(chartCanvas, {
-        type: "line",
-        data: {
-          labels: sortedDates,
-          datasets: [{
-            label: "Leads criados por dia",
-            data: counts,
-            fill: false,
-            borderColor: "#00acc1",
-            tension: 0.3,
-            pointBackgroundColor: "#00acc1",
-            pointBorderColor: "#00acc1"
-          }]
-        },
-        options: {
-          scales: {
-            x: {
-              ticks: { color: "#fff" },
-              grid: { color: "#444" }
-            },
-            y: {
-              beginAtZero: true,
-              ticks: { color: "#fff" },
-              grid: { color: "#444" }
-            }
-          },
-          plugins: {
-            legend: { labels: { color: "#fff" } }
+      try {
+        const response = await window.Kommo.request.get("/api/v4/leads", {
+          params: {
+            'filter[created_at][from]': start,
+            'filter[created_at][to]': end
           }
-        }
-      });
-    }
-  </script>
+        });
 
-  <script>
-    // Aguarda o SDK do Kommo carregar
-    window.KommoWidget = function() {
+        const leads = response?._embedded?.leads || [];
+
+        const dailyCounts = {};
+        for (const lead of leads) {
+          const date = new Date(lead.created_at * 1000).toISOString().split("T")[0];
+          dailyCounts[date] = (dailyCounts[date] || 0) + 1;
+        }
+
+        const sortedDates = Object.keys(dailyCounts).sort();
+        const counts = sortedDates.map(date => dailyCounts[date]);
+
+        if (leadsChart) leadsChart.destroy();
+
+        leadsChart = new Chart(chartCanvas, {
+          type: "line",
+          data: {
+            labels: sortedDates,
+            datasets: [{
+              label: "Leads criados por dia",
+              data: counts,
+              fill: false,
+              borderColor: "#00acc1",
+              tension: 0.3,
+              pointBackgroundColor: "#00acc1",
+              pointBorderColor: "#00acc1"
+            }]
+          },
+          options: {
+            scales: {
+              x: {
+                ticks: { color: "#fff" },
+                grid: { color: "#444" }
+              },
+              y: {
+                beginAtZero: true,
+                ticks: { color: "#fff" },
+                grid: { color: "#444" }
+              }
+            },
+            plugins: {
+              legend: { labels: { color: "#fff" } }
+            }
+          }
+        });
+      } catch (error) {
+        console.error("Erro ao carregar os dados:", error);
+        alert("Erro ao buscar os dados dos leads.");
+      }
+    }
+
+    window.KommoWidget = function () {
       return {
-        init: function() {
+        init: function () {
           console.log("Widget iniciado!");
         }
-      }
-    }
+      };
+    };
   </script>
 </body>
 </html>
